@@ -13,7 +13,7 @@
   <a href="#download">Download</a> •
 </p>
 
-![screenshot](assets/demo.gif)
+![screenshot](assets/demo_cli.gif)
 
 ## Key Features (In the future there will be more features)
 
