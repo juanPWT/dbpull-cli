@@ -75,9 +75,10 @@ func QuestionModel(credential []QuestionCredential) *model {
 	clientField.Placeholder = "Enter here"
 	clientField.Focus()
 
-	return &model{QuestionCredential: credential,
-		QuestionStyle: styleQ,
-		Selected:      make(map[int]struct{}),
+	return &model{
+		QuestionCredential: credential,
+		QuestionStyle:      styleQ,
+		Selected:           make(map[int]struct{}),
 	}
 }
 
@@ -112,7 +113,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "ctrl+c", "esc":
 				return m, tea.Quit
 			case "up":
-				m.Cursor--
+				if m.Cursor > 0 {
+					m.Cursor--
+				}
 			case "down":
 				m.Cursor++
 			case "enter":

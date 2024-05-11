@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
@@ -13,12 +14,13 @@ var resultFail = lipgloss.NewStyle().Border(lipgloss.NormalBorder()).Foreground(
 var commandExitHelp = lipgloss.NewStyle().Foreground(lipgloss.Color("#FF4444")).Bold(true)
 var commandHelp = lipgloss.NewStyle().Foreground(lipgloss.Color("#E449E6")).Bold(true)
 var showTablesS = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).Foreground(lipgloss.Color("#5BFF2E")).BorderForeground(lipgloss.Color("#5BFF2E")).Padding(1)
-var skyText = lipgloss.NewStyle().Foreground(lipgloss.Color("#57FAFF")).Bold(true).Margin(1)
+var skyText = lipgloss.NewStyle().Foreground(lipgloss.Color("#57FAFF")).Bold(true)
 
 func (m model) Starter(url string) string {
 	var tableString string
+	app := new(App)
 
-	if _, ok := PingDB(url); !ok {
+	if _, ok := app.PingDB(url); !ok {
 		return lipgloss.Place(
 			m.Width,
 			m.Height,
@@ -31,7 +33,7 @@ func (m model) Starter(url string) string {
 			))
 	}
 
-	t, ok := GetTables()
+	t, ok := app.GetTables()
 
 	if !ok {
 		return lipgloss.Place(
@@ -73,8 +75,13 @@ func (m model) Starter(url string) string {
 	}
 
 	// get column tables
-	columns := GetColumns(tableString)
+	columns := app.GetColumns(tableString)
 	formatedColumns := strings.Join(columns, " | ")
+
+	// get values
+	values := app.GetValues(tableString)
+
+	formatedValues := FormatValues(values, columns)
 
 	return lipgloss.Place(
 		m.Width,
@@ -85,8 +92,33 @@ func (m model) Starter(url string) string {
 			lipgloss.Left,
 			resultSuccess.Render("success connect to database"),
 			showTablesS.Render(sTable),
-			skyText.Render(fmt.Sprintf("table: %s", tableString)),
-			skyText.Render(formatedColumns),
+			skyText.MarginTop(1).Render(formatedColumns),
+			skyText.Render(formatedValues),
 			fmt.Sprintf("Press key %s or %s to quit", commandExitHelp.Render("ctrl+c"), commandExitHelp.Render("esc")),
 		))
+}
+
+func FormatValues(values []map[string]interface{}, columns []string) string {
+	var result strings.Builder
+
+	for _, v := range values {
+		for i, col := range columns {
+			if i > 0 {
+				result.WriteString(" | ")
+			}
+			val := v[col]
+			switch t := val.(type) {
+			case int:
+				result.WriteString(strconv.Itoa(t))
+			case string:
+				result.WriteString(t)
+			default:
+				result.WriteString(fmt.Sprintf("%v", t))
+			}
+		}
+
+		result.WriteString("\n")
+	}
+
+	return result.String()
 }
