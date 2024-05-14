@@ -9,6 +9,15 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+var asciiLogo = `
+________ ____________________      .__  .__            _________ .____    .___ 
+\______ \\______   \______   \__ __|  | |  |           \_   ___ \|    |   |   |
+ |    |  \|    |  _/|     ___/  |  \  | |  |    ______ /    \  \/|    |   |   |
+ |    ` + "`" + `   \    |   \|    |   |  |  /  |_|  |__ /_____/ \     \___|    |___|   |
+/_______  /______  /|____|   |____/|____/____/          \______  /_______ \___|
+        \/       \/                                            \/        \/    
+    `
+
 // style
 var logo = lipgloss.NewStyle().Border(lipgloss.ThickBorder()).Foreground(lipgloss.Color("#F975DC")).BorderForeground(lipgloss.Color("#F975DC")).Padding(1, 2)
 
@@ -117,7 +126,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.Cursor--
 				}
 			case "down":
+				// if m.Cursor < len(m.ListOfTable)-1 {
 				m.Cursor++
+				// }
 			case "enter":
 				_, ok := m.Selected[m.Cursor]
 				if ok {
@@ -125,6 +136,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				} else {
 					m.Selected[m.Cursor] = struct{}{}
 				}
+			case "j":
+				fmt.Println()
 			}
 		}
 	}
@@ -147,7 +160,7 @@ func (m model) View() string {
 			if q.index == "username" {
 				username = q.answer
 			} else if q.index == "password" {
-				password = q.answer
+				password = fmt.Sprintf(":%s", q.answer)
 			} else if q.index == "dbname" {
 				dbname = q.answer
 			}
@@ -155,10 +168,10 @@ func (m model) View() string {
 
 		url = fmt.Sprintf("%s%s@tcp(127.0.0.1:3306)/%s?charset=utf8mb4&parseTime=True&loc=Local", username, password, dbname)
 
-		// test connection
-		output := m.Starter(url)
+		// start app
+		app := m.Starter(url)
 
-		return output
+		return app
 
 	}
 
@@ -172,7 +185,7 @@ func (m model) View() string {
 		lipgloss.Left,
 		lipgloss.Left,
 		lipgloss.JoinVertical(lipgloss.Left,
-			logo.Render("DBPull\n"),
+			logo.Render(fmt.Sprintf("%s\n", asciiLogo)),
 			m.QuestionCredential[m.Index].question,
 			m.QuestionStyle.InputFieldColor.Render(current.input.View()),
 			fmt.Sprintf("Press key %s or %s to quit", commandHelp.Render("ctrl+c"), commandHelp.Render("esc")),
@@ -191,7 +204,7 @@ func (m *model) Next() {
 
 func main() {
 
-	questionCredential := []QuestionCredential{newShortQuestion("username", "username?"), newShortQuestion("password", "password example: ':mypassword' if password null its ok leave with null value"), newShortQuestion("dbname", "DB name?")}
+	questionCredential := []QuestionCredential{newShortQuestion("username", "username?"), newShortQuestion("password", "password?"), newShortQuestion("dbname", "DB name?")}
 
 	m := QuestionModel(questionCredential)
 

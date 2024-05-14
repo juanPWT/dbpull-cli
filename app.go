@@ -58,7 +58,7 @@ func (m model) Starter(url string) string {
 
 	for i, table := range m.ListOfTable {
 		cursor := " "
-		// is pointed table
+		// is pointed table1
 		if m.Cursor == i {
 			cursor = ">"
 		}
