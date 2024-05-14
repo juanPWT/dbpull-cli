@@ -16,7 +16,7 @@ var commandHelp = lipgloss.NewStyle().Foreground(lipgloss.Color("#E449E6")).Bold
 var showTablesS = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).Foreground(lipgloss.Color("#5BFF2E")).BorderForeground(lipgloss.Color("#5BFF2E")).Padding(1)
 var skyText = lipgloss.NewStyle().Foreground(lipgloss.Color("#57FAFF")).Bold(true)
 
-func (m model) Starter(url string) string {
+func (m model) Starter(url string, dbName string) string {
 	var tableString string
 	app := new(App)
 
@@ -90,7 +90,7 @@ func (m model) Starter(url string) string {
 		lipgloss.Left,
 		lipgloss.JoinVertical(
 			lipgloss.Left,
-			resultSuccess.Render("success connect to database"),
+			resultSuccess.Render(fmt.Sprintf("success connect to %s", dbName)),
 			showTablesS.Render(sTable),
 			skyText.MarginTop(1).Render(formatedColumns),
 			skyText.Render(formatedValues),
