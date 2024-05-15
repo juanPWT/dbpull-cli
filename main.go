@@ -3,12 +3,14 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
+var version = "v0.0.1"
 var asciiLogo = `
 ________ ____________________      .__  .__            _________ .____    .___ 
 \______ \\______   \______   \__ __|  | |  |           \_   ___ \|    |   |   |
@@ -76,7 +78,7 @@ func newShortQuestion(index string, question string) QuestionCredential {
 	return q
 }
 
-func QuestionModel(credential []QuestionCredential) *model {
+func InitModel(credential []QuestionCredential) *model {
 	// question style
 	styleQ := QuestionDefaultStyle()
 
@@ -96,6 +98,7 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+
 	var cmd tea.Cmd
 
 	current := &m.QuestionCredential[m.Index]
@@ -107,6 +110,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		if !m.Done {
 			switch msg.String() {
+			case "alt+j":
+				fmt.Println("Juan ganteng")
+				return m, tea.Quit
 			case "ctrl+c", "esc":
 				return m, tea.Quit
 			case "enter":
@@ -136,8 +142,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				} else {
 					m.Selected[m.Cursor] = struct{}{}
 				}
-			case "j":
-				fmt.Println()
 			}
 		}
 	}
@@ -148,6 +152,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
+
 	current := &m.QuestionCredential[m.Index]
 
 	// if done print here
@@ -169,7 +174,7 @@ func (m model) View() string {
 		url = fmt.Sprintf("%s%s@tcp(127.0.0.1:3306)/%s?charset=utf8mb4&parseTime=True&loc=Local", username, password, dbname)
 
 		// start app
-		app := m.Starter(url)
+		app := m.Starter(url, dbname)
 
 		return app
 
@@ -191,7 +196,6 @@ func (m model) View() string {
 			fmt.Sprintf("Press key %s or %s to quit", commandHelp.Render("ctrl+c"), commandHelp.Render("esc")),
 		),
 	)
-
 }
 
 func (m *model) Next() {
@@ -204,20 +208,40 @@ func (m *model) Next() {
 
 func main() {
 
-	questionCredential := []QuestionCredential{newShortQuestion("username", "username?"), newShortQuestion("password", "password?"), newShortQuestion("dbname", "DB name?")}
-
-	m := QuestionModel(questionCredential)
-
-	f, err := tea.LogToFile("debug.log", "debug")
-	if err != nil {
-		log.Fatal(err)
+	if len(os.Args) < 2 {
+		fmt.Println(resultFail.Render("dbpull-cli <command>, 'dbpull-cli help' for list command"))
+		os.Exit(1)
 	}
 
-	defer f.Close()
+	arg := os.Args[1]
 
-	app := tea.NewProgram(m)
+	switch arg {
+	case "start":
+		questionCredential := []QuestionCredential{newShortQuestion("username", "username?"), newShortQuestion("password", "password?"), newShortQuestion("dbname", "DB name?")}
 
-	if _, err := app.Run(); err != nil {
-		log.Fatal(err)
+		m := InitModel(questionCredential)
+
+		f, err := tea.LogToFile("debug.log", "debug")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		defer f.Close()
+
+		app := tea.NewProgram(m)
+
+		if _, err := app.Run(); err != nil {
+			log.Fatal(err)
+		}
+	case "version":
+		fmt.Printf("%s\ndbpull-cli version %s\n", skyText.Render(asciiLogo), skyText.Render(version))
+		return
+	case "help":
+		fmt.Println(HelpString())
+		return
+	default:
+		fmt.Println(resultFail.Render("dbpull error: command not found, 'dbpull-cli help' for list command"))
+		os.Exit(1)
 	}
+
 }
