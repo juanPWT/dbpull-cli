@@ -209,7 +209,7 @@ func (m *model) Next() {
 func main() {
 
 	if len(os.Args) < 2 {
-		fmt.Println(resultFail.Render("dbpull-cli <command>, help for list command"))
+		fmt.Println(resultFail.Render("dbpull-cli <command>, 'dbpull-cli help' for list command"))
 		os.Exit(1)
 	}
 
@@ -240,7 +240,7 @@ func main() {
 		fmt.Println(HelpString())
 		return
 	default:
-		fmt.Println(resultFail.Render("dbpull error: command not found, help for list command"))
+		fmt.Println(resultFail.Render("dbpull error: command not found, 'dbpull-cli help' for list command"))
 		os.Exit(1)
 	}
 
