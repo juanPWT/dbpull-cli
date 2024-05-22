@@ -10,7 +10,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-var version = "v0.0.1"
+var version = "v0.0.2"
 var asciiLogo = `
 ________ ____________________      .__  .__            _________ .____    .___ 
 \______ \\______   \______   \__ __|  | |  |           \_   ___ \|    |   |   |
@@ -219,14 +219,7 @@ func main() {
 	case "start":
 		questionCredential := []QuestionCredential{newShortQuestion("username", "username?"), newShortQuestion("password", "password?"), newShortQuestion("dbname", "DB name?")}
 
-		m := InitModel(questionCredential)
-
-		f, err := tea.LogToFile("debug.log", "debug")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		defer f.Close()
+		m := InitModel(questionCredential)	
 
 		app := tea.NewProgram(m)
 
